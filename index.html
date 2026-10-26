@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080809">
+  <title>VOID // 001</title>
+  <style>
+    :root { --bg: #080809; --text: #d5d5d5; --green: #91b89a; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100svh; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: "Courier New", monospace;
+    }
+    #ambient {
+      position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+      mask-image: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,.3) 30%, black 100%);
+    }
+    .fragment {
+      position: absolute; color: #77777d; opacity: 0; white-space: nowrap; user-select: none;
+      animation: appear var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay); transform: translateY(12px); will-change: opacity, transform;
+    }
+    @keyframes appear {
+      0%, 100% { opacity: 0; transform: translateY(12px); }
+      20%, 65% { opacity: var(--brightness); transform: translateY(0); }
+      85% { opacity: 0; transform: translateY(-8px); }
+    }
+    main {
+      position: relative; z-index: 1; min-height: 100vh; min-height: 100svh;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .void { width: min(340px, 100%); text-align: center; }
+    .status { margin: 0 0 23px; font-size: 9px; letter-spacing: 3px; color: #66666c; }
+    h1 { margin: 0; font-size: clamp(27px, 5vw, 34px); font-weight: 400; letter-spacing: .42em; padding-left: .42em; color: #e1e1e1; }
+    .subtitle { margin: 15px 0 43px; font-size: 9px; letter-spacing: 3px; color: #65656a; }
+    form { width: 100%; }
+    .input-line { display: flex; align-items: center; width: 100%; border-bottom: 1px solid transparent; transition: border-color .3s ease; }
+    .input-line:focus-within { border-bottom-color: #3a3a3e; }
+    input {
+      display: block; width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: none;
+      background: transparent; color: #d5d5d5; font: inherit; font-size: 12px; caret-color: var(--green);
+      opacity: 1; filter: blur(0); transform: translateY(0);
+      transition: opacity 850ms ease, filter 850ms ease, transform 850ms ease;
+    }
+    input::placeholder { color: #66666b; opacity: 1; }
+    #message.absorbing { opacity: 0; filter: blur(5px); transform: translateY(-5px); pointer-events: none; }
+    button {
+      flex: 0 0 auto; border: 0; padding: 10px 2px 10px 12px; color: #77777d;
+      background: transparent; font: inherit; font-size: 16px; cursor: pointer; transition: color .2s ease;
+    }
+    button:hover, button:focus-visible { color: #eeeeee; }
+    button:disabled { opacity: .4; cursor: wait; }
+    .footer { position: fixed; bottom: 22px; left: 0; right: 0; text-align: center; font-size: 8px; letter-spacing: 2px; color: #45454a; z-index: 1; pointer-events: none; }
+    @media (max-width: 480px) { .subtitle { margin-bottom: 35px; } .fragment { font-size: 10px !important; } }
+    @media (prefers-reduced-motion: reduce) { .fragment { animation: none; display: none; } input { transition-duration: 150ms; } }
+  </style>
+</head>
+<body>
+  <div id="ambient" aria-hidden="true"></div>
+  <main>
+    <section class="void" aria-label="Void terminal">
+      <p class="status">SYSTEM ONLINE // 001</p>
+      <h1>VOID</h1>
+      <p class="subtitle">NOTHING IS RANDOM.</p>
+      <form id="void-form">
+        <div class="input-line">
+          <input id="message" type="text" maxlength="2000" placeholder="leave something behind..." autocomplete="off" aria-label="Your message" required>
+          <button id="send" type="submit" aria-label="Send message" title="Transmit">↗</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <div class="footer">VOID // 001</div>
+  <script>
+    // Decorative random background animation.
+    const ambient = document.getElementById("ambient");
+    const fragments = [
+      "0x00", "010010", "nothing persists", "::", "null", "undefined",
+      "0 1 0 1", "[ signal lost ]", "existence.exe", "void()", "∅",
+      "0xFF", "no signal", "everything fades", "//", "NaN", "01010101",
+      "where am I?", "silence", "connection unstable", "{}", "404",
+      "the system remembers", "0.0001", "echo", "∞", "..."
+    ];
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function createFragments() {
+      if (reducedMotion) return;
+      const count = window.innerWidth < 600 ? 20 : 34;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement("span");
+        el.className = "fragment";
+        el.textContent = fragments[Math.floor(Math.random() * fragments.length)];
+        el.style.left = Math.random() * 94 + "%";
+        el.style.top = Math.random() * 94 + "%";
+        el.style.fontSize = (10 + Math.random() * 4) + "px";
+        el.style.letterSpacing = "1px";
+        el.style.setProperty("--duration", (7 + Math.random() * 13) + "s");
+        el.style.setProperty("--delay", (-Math.random() * 18) + "s");
+        el.style.setProperty("--brightness", (0.12 + Math.random() * 0.27).toFixed(2));
+        ambient.appendChild(el);
+      }
+    }
+    createFragments();
+
+    // API Gateway POST endpoint used by the deployed project.
+    const API_URL = "https://hgetk44qk6.execute-api.eu-north-1.amazonaws.com/dev/void";
+    const form = document.getElementById("void-form");
+    const input = document.getElementById("message");
+    const send = document.getElementById("send");
+    let absorbing = false;
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message || absorbing) return;
+
+      absorbing = true;
+      send.disabled = true;
+      input.classList.add("absorbing");
+
+      // Fire-and-forget request: the visual effect doesn't wait for AWS.
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Visitor", message })
+      }).catch((error) => {
+        // Errors are logged for debugging, never displayed on the page.
+        console.error("Void request failed:", error);
+      });
+
+      // Always clear the input after the absorption animation.
+      window.setTimeout(() => {
+        input.value = "";
+        input.classList.remove("absorbing");
+        send.disabled = false;
+        absorbing = false;
+        input.focus();
+      }, reducedMotion ? 150 : 850);
+    });
+  </script>
+</body>
+</html>
